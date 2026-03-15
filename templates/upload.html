@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Tải Quiz - QuizGenerator{% endblock %}
+
+{% block content %}
+<h2>📤 Tải Quiz từ File Excel</h2>
+
+<div style="max-width: 600px; margin: 30px auto;">
+    <div class="card">
+        <h3>📋 Yêu Cầu File Excel</h3>
+        <ul style="color: #666; line-height: 1.8;">
+            <li><strong>Sheet Name:</strong> Tên sheet (mặc định "Questions")</li>
+            <li><strong>Cột A:</strong> Câu hỏi (Question)</li>
+            <li><strong>Cột B:</strong> Đáp án A (Option A)</li>
+            <li><strong>Cột C:</strong> Đáp án B (Option B)</li>
+            <li><strong>Cột D:</strong> Đáp án C (Option C)</li>
+            <li><strong>Cột E:</strong> Đáp án D (Option D)</li>
+            <li><strong>Cột F:</strong> Đáp án Đúng (Correct Answer: A, B, C, hoặc D)</li>
+        </ul>
+    </div>
+
+    <form id="uploadForm" style="margin-top: 30px;">
+        <div class="form-group">
+            <label for="quizName">📝 Tên Bài Quiz:</label>
+            <input type="text" id="quizName" name="quizName" required placeholder="Ví dụ: Kiểm Tra Tiếng Anh - Chương 1">
+        </div>
+
+        <div class="form-group">
+            <label for="excelFile">📁 Chọn File Excel (.xlsx, .xls):</label>
+            <input type="file" id="excelFile" name="excelFile" accept=".xlsx,.xls" required>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 16px;">
+            ✅ Tải Lên Quiz
+        </button>
+    </form>
+
+    <div id="uploadProgress" style="margin-top: 20px; display: none;">
+        <div class="loading" style="display: flex; justify-content: center; margin: 20px;">
+            <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        </div>
+        <p style="text-align: center; color: #667eea;">Đang xử lý file...</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const quizName = document.getElementById('quizName').value;
+        const excelFile = document.getElementById('excelFile').files[0];
+
+        if (!excelFile) {
+            showMessage('❌ Vui lòng chọn file Excel', 'error');
+            return;
+        }
+
+        // Show progress
+        document.getElementById('uploadProgress').style.display = 'block';
+
+        try {
+            const formData = new FormData();
+            formData.append('quiz_name', quizName);
+            formData.append('file', excelFile);
+
+            const response = await fetch('/api/quizzes/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Lỗi upload file');
+            }
+
+            showMessage(`✅ Tải quiz "${quizName}" thành công!`, 'success');
+            
+            // Reset form
+            document.getElementById('uploadForm').reset();
+            document.getElementById('uploadProgress').style.display = 'none';
+
+            // Redirect to quiz list after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/list-quizzes';
+            }, 2000);
+
+        } catch (error) {
+            showMessage(`❌ ${error.message}`, 'error');
+            document.getElementById('uploadProgress').style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

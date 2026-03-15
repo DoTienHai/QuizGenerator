@@ -1,13 +1,38 @@
 """
-QuizGenerator - Flask API Endpoints
+QuizGenerator - Flask API Endpoints & Frontend
 """
 from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
 
+# ============================================================================
+# FRONTEND ROUTES
+# ============================================================================
+
 @app.route('/')
-def hello():
+def index():
+    """Homepage - Main landing page"""
     return render_template('index.html')
+
+@app.route('/upload')
+def upload():
+    """Quiz upload page"""
+    return render_template('upload.html')
+
+@app.route('/list-quizzes')
+def list_quizzes_page():
+    """List all quizzes page"""
+    return render_template('list-quizzes.html')
+
+@app.route('/exam')
+def exam():
+    """Exam page - Take exam"""
+    return render_template('exam.html')
+
+@app.route('/results')
+def results():
+    """Results page - View exam results"""
+    return render_template('results.html')
 
 # ============================================================================
 # QUIZ ENDPOINTS

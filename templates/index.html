@@ -1,113 +1,86 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>QuizGenerator API</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            color: #333;
-            border-bottom: 3px solid #0066cc;
-            padding-bottom: 10px;
-        }
-        .section {
-            background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .section h2 {
-            color: #0066cc;
-            margin-top: 0;
-        }
-        .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 10px;
-        }
-        .btn {
-            padding: 12px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        .btn-get {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-get:hover {
-            background-color: #218838;
-        }
-        .btn-post {
-            background-color: #0066cc;
-            color: white;
-        }
-        .btn-post:hover {
-            background-color: #0052a3;
-        }
-        .note {
-            color: #666;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-    </style>
-</head>
-<body>
-    <h1>🎯 QuizGenerator API</h1>
-    
-    <div class="section">
-        <h2>📋 Quiz Endpoints</h2>
-        <div class="buttons-grid">
-            <a href="/api/quizzes" class="btn btn-get">GET /api/quizzes<br><span class="note">List all quizzes</span></a>
-            <a href="/api/quizzes/1" class="btn btn-get">GET /api/quizzes/1<br><span class="note">Get quiz details</span></a>
-            <a href="/api/quizzes/1/results" class="btn btn-get">GET /api/quizzes/1/results<br><span class="note">Get quiz results</span></a>
-            <button class="btn btn-post" onclick="alert('POST /api/quizzes/upload\\nUse Postman or curl')">POST /api/quizzes/upload<br><span class="note">Upload Excel file</span></button>
-        </div>
+{% extends "base.html" %}
+
+{% block title %}QuizGenerator - Trang Chủ{% endblock %}
+
+{% block content %}
+<h2>🎉 Chào Mừng đến QuizGenerator</h2>
+<p style="font-size: 1.1em; color: #666; margin: 20px 0;">
+    Hệ thống tạo bài kiểm tra từ file Excel, với tính năng tự động chấm điểm và thống kê kết quả.
+</p>
+
+<div class="grid">
+    <div class="card">
+        <h3>📤 Tải Quiz</h3>
+        <p>Tải lên file Excel chứa các câu hỏi và đáp án</p>
+        <a href="/upload" class="btn">Bắt Đầu</a>
     </div>
 
-    <div class="section">
-        <h2>🎮 Exam Session Endpoints</h2>
-        <div class="buttons-grid">
-            <button class="btn btn-post" onclick="alert('POST /api/sessions\\nBody: {\\n  quiz_id: 1,\\n  num_questions: 20,\\n  exam_duration: 60\\n}')">POST /api/sessions<br><span class="note">Create exam session</span></button>
-            <a href="/api/sessions/1" class="btn btn-get">GET /api/sessions/1<br><span class="note">Get session details</span></a>
-            <a href="/api/sessions/1/status" class="btn btn-get">GET /api/sessions/1/status<br><span class="note">Check session status</span></a>
-        </div>
+    <div class="card">
+        <h3>📋 Danh Sách Quiz</h3>
+        <p>Xem tất cả các bài quiz đã tải lên</p>
+        <a href="/list-quizzes" class="btn">Xem Danh Sách</a>
     </div>
 
-    <div class="section">
-        <h2>✍️ Answer & Submission Endpoints</h2>
-        <div class="buttons-grid">
-            <button class="btn btn-post" onclick="alert('POST /api/sessions/1/answers\\nBody: {\\n  answers: {\\n    1: A,\\n    2: B\\n  }\\n}')">POST /api/sessions/1/answers<br><span class="note">Submit answers</span></button>
-            <button class="btn btn-post" onclick="alert('POST /api/sessions/1/submit')">POST /api/sessions/1/submit<br><span class="note">Final submission</span></button>
-            <button class="btn btn-post" onclick="alert('POST /api/sessions/1/auto-submit')">POST /api/sessions/1/auto-submit<br><span class="note">Auto-submit (timeout)</span></button>
-        </div>
+    <div class="card">
+        <h3>🎮 Làm Bài Kiểm Tra</h3>
+        <p>Chọn bài quiz và bắt đầu làm bài</p>
+        <a href="/exam" class="btn">Làm Bài</a>
     </div>
 
-    <div class="section">
-        <h2>📊 Results Endpoints</h2>
-        <div class="buttons-grid">
-            <a href="/api/results/1" class="btn btn-get">GET /api/results/1<br><span class="note">Get exam results</span></a>
-        </div>
+    <div class="card">
+        <h3>📊 Kết Quả</h3>
+        <p>Xem kết quả và thống kê điểm số</p>
+        <a href="#" class="btn" onclick="showAllResults(); return false;">Xem Kết Quả</a>
     </div>
+</div>
 
-    <div class="section" style="background-color: #e7f3ff; border-left: 4px solid #0066cc;">
-        <h3>📝 Ghi chú</h3>
-        <ul>
-            <li><span class="btn btn-get" style="padding: 4px 8px; font-size: 12px;">GET</span> - Click trực tiếp để test</li>
-            <li><span class="btn btn-post" style="padding: 4px 8px; font-size: 12px;">POST</span> - Dùng Postman, curl, hoặc click để xem ví dụ</li>
-            <li>Thay thế ID (1) bằng ID thực tế để test</li>
-        </ul>
-    </div>
-</body>
-</html>
+<hr style="margin: 40px 0; border: none; border-top: 2px solid #ddd;">
+
+<h3>🔌 API Endpoints Test</h3>
+<p style="color: #666; margin-bottom: 20px;">Kiểm tra các endpoint còn phát triển</p>
+
+<div id="endpoints" class="grid"></div>
+
+<script>
+    // Load and display all endpoints for testing
+    const endpoints = [
+        { method: 'GET', url: '/api/quizzes', name: 'Danh sách Quiz', description: 'Lấy tất cả quizzes' },
+        { method: 'GET', url: '/api/sessions/1', name: 'Chi Tiết Session', description: 'Lấy thông tin session' },
+        { method: 'GET', url: '/api/sessions/1/status', name: 'Trạng Thái Session', description: 'Kiểm tra trạng thái exam' },
+        { method: 'GET', url: '/api/results/1', name: 'Kết Quả', description: 'Lấy kết quả exam' },
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const endpointsContainer = document.getElementById('endpoints');
+
+        endpoints.forEach(endpoint => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h3>${endpoint.name}</h3>
+                <p>${endpoint.description}</p>
+                <small><strong>${endpoint.method}</strong> ${endpoint.url}</small>
+                <br>
+                <button class="btn btn-secondary" style="margin-top: 10px;" onclick="testEndpoint('${endpoint.url}', '${endpoint.method}')">Test</button>
+            `;
+            endpointsContainer.appendChild(card);
+        });
+    });
+
+    function testEndpoint(url, method) {
+        showMessage(`Đang gọi ${method} ${url}...`, 'info');
+        apiCall(url, method)
+            .then(data => {
+                console.log('Response:', data);
+                showMessage(`✅ ${method} ${url} - OK`, 'success');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function showAllResults() {
+        testEndpoint('/api/results/1', 'GET');
+    }
+</script>
+{% endblock %}

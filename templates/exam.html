@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Làm Bài Kiểm Tra - QuizGenerator{% endblock %}
+
+{% block content %}
+<div id="configSection" style="max-width: 600px; margin: 30px auto;">
+    <h2>⚙️ Cấu Hình Bài Kiểm Tra</h2>
+
+    <form id="configForm" style="margin-top: 30px;">
+        <div class="form-group">
+            <label for="numQuestions">📊 Số Câu Hỏi (1-50):</label>
+            <input type="number" id="numQuestions" name="numQuestions" min="1" max="50" value="10" required>
+        </div>
+
+        <div class="form-group">
+            <label for="duration">⏱️ Thời Gian (phút):</label>
+            <input type="number" id="duration" name="duration" min="1" max="180" value="30" required>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 16px;">
+            🎮 Bắt Đầu Làm Bài
+        </button>
+    </form>
+</div>
+
+<div id="examSection" style="display: none;">
+    <div class="timer" id="timer">30:00</div>
+
+    <div id="questionContainer"></div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <button type="button" class="btn btn-success" onclick="submitExam()">
+            ✅ Nộp Bài
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="resetExam()">
+            🔄 Làm Lại
+        </button>
+    </div>
+</div>
+
+<script>
+    let sessionId = null;
+    let remainingTime = 0;
+    let timerInterval = null;
+    let answers = {};
+
+    document.getElementById('configForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const quizId = sessionStorage.getItem('selectedQuizId');
+        const numQuestions = parseInt(document.getElementById('numQuestions').value);
+        const duration = parseInt(document.getElementById('duration').value);
+
+        if (!quizId) {
+            showMessage('❌ Vui lòng chọn quiz trước', 'error');
+            return;
+        }
+
+        try {
+            showMessage('Đang tạo session...', 'info');
+
+            const response = await fetch('/api/sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    quiz_id: parseInt(quizId),
+                    num_questions: numQuestions,
+                    exam_duration: duration
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi tạo session');
+            }
+
+            sessionId = data.session_id;
+            remainingTime = duration * 60;
+
+            // Load questions
+            loadQuestions(sessionId);
+
+            // Hide config, show exam
+            document.getElementById('configSection').style.display = 'none';
+            document.getElementById('examSection').style.display = 'block';
+
+            // Start timer
+            startTimer();
+
+            showMessage('✅ Session tạo thành công!', 'success');
+
+        } catch (error) {
+            showMessage(`❌ ${error.message}`, 'error');
+        }
+    });
+
+    async function loadQuestions(sessionId) {
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi tải câu hỏi');
+            }
+
+            const questions = data.questions || [];
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-card';
+                questionDiv.innerHTML = `
+                    <div class="question-text">
+                        <span style="color: #667eea; font-weight: bold;">Câu ${index + 1}:</span>
+                        ${question.text || 'Câu hỏi không có nội dung'}
+                    </div>
+                    <div class="options">
+                        ${['A', 'B', 'C', 'D'].map(option => `
+                            <label class="option">
+                                <input type="radio" name="question_${question.id}" value="${option}" onchange="recordAnswer(${question.id}, '${option}')">
+                                <span class="option-label">${option}. ${question[`option_${option.toLowerCase()}`] || 'N/A'}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+
+        } catch (error) {
+            showMessage(`❌ ${error.message}`, 'error');
+        }
+    }
+
+    function recordAnswer(questionId, answer) {
+        answers[questionId] = answer;
+        console.log('Answer recorded:', questionId, answer);
+    }
+
+    function startTimer() {
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            remainingTime--;
+
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                auto_submitExam();
+                return;
+            }
+
+            updateTimerDisplay();
+
+            // Warning at 5 minutes
+            if (remainingTime === 300) {
+                showMessage('⚠️ Còn 5 phút!', 'info');
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        const timerElement = document.getElementById('timer');
+        timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        // Change color based on time remaining
+        if (remainingTime <= 60) {
+            timerElement.classList.add('danger');
+            timerElement.classList.remove('warning');
+        } else if (remainingTime <= 300) {
+            timerElement.classList.add('warning');
+            timerElement.classList.remove('danger');
+        } else {
+            timerElement.classList.remove('danger', 'warning');
+        }
+    }
+
+    async function submitExam() {
+        if (!sessionId) {
+            showMessage('❌ Session không hợp lệ', 'error');
+            return;
+        }
+
+        if (Object.keys(answers).length === 0) {
+            showMessage('⚠️ Bạn chưa trả lời câu nào', 'info');
+            return;
+        }
+
+        try {
+            clearInterval(timerInterval);
+            showMessage('Đang nộp bài...', 'info');
+
+            // Submit answers
+            const submitResponse = await fetch(`/api/sessions/${sessionId}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ answers: answers })
+            });
+
+            const submitData = await submitResponse.json();
+
+            if (!submitResponse.ok) {
+                throw new Error(submitData.error || 'Lỗi nộp bài');
+            }
+
+            showMessage('✅ Nộp bài thành công!', 'success');
+
+            // Redirect to results
+            sessionStorage.setItem('examSessionId', sessionId);
+            setTimeout(() => {
+                window.location.href = '/results';
+            }, 1500);
+
+        } catch (error) {
+            showMessage(`❌ ${error.message}`, 'error');
+            startTimer(); // Restart timer if error
+        }
+    }
+
+    async function auto_submitExam() {
+        showMessage('⏰ Hết thời gian! Đang nộp bài tự động...', 'info');
+        await submitExam();
+    }
+
+    function resetExam() {
+        if (confirm('Bạn có chắc muốn làm lại bài từ đầu?')) {
+            clearInterval(timerInterval);
+            sessionId = null;
+            answers = {};
+            document.getElementById('configSection').style.display = 'block';
+            document.getElementById('examSection').style.display = 'none';
+            document.getElementById('configForm').reset();
+        }
+    }
+</script>
+{% endblock %}
