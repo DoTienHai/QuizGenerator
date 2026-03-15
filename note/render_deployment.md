@@ -441,7 +441,135 @@ Post-Deploy:
 
 ---
 
-## 14. Next Steps
+## 14. ⚠️ CRITICAL: Flask Host & Port Configuration
+
+### Vấn Đề (Problem)
+
+Khi deploy lên Render.com, Flask phải được cấu hình **đúng cách** để nghe các request từ internet.
+
+**Lỗi nếu config sai**:
+```
+ERROR: No open ports detected on 0.0.0.0, continuing to scan...
+↓
+Render.com không thể truy cập Flask app
+↓
+Deploy fails ❌
+```
+
+### Nguyên Nhân
+
+Render.com là **cloud server**:
+- Flask chạy trên một **container** (virtual machine)
+- Người dùng truy cập từ **internet** (external network)
+- Flask cần nghe trên **tất cả network interfaces** (không chỉ localhost)
+
+### Giải Pháp: 2 Thay Đổi Bắt Buộc
+
+#### ❌ SAI (Local development only):
+```python
+if __name__ == '__main__':
+    app.run(debug=True)  # ← Chỉ nghe localhost
+```
+
+**Khi chạy**:
+```
+* Running on http://127.0.0.1:5000
+* Chỉ máy bạn truy cập được
+```
+
+#### ✅ ĐÚNG (Production on Render):
+```python
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5000))  # ← Cần bắt buộc
+    app.run(host='0.0.0.0', port=port, debug=False)  # ← Cần bắt buộc
+```
+
+**Khi chạy**:
+```
+* Running on http://0.0.0.0:5000 (locally)
+* Hoặc 0.0.0.0:10000 (on Render)
+* Ai cũng từ internet truy cập được
+```
+
+### Chi Tiết: Localhost vs 0.0.0.0
+
+| Config | Nghe Trên | Ai Truy Cập Được | Dùng Cho |
+|--------|-----------|------------------|----------|
+| `127.0.0.1` | localhost | Chỉ máy local | Local dev |
+| `localhost` | localhost | Chỉ máy local | Local dev |
+| `0.0.0.0` | Tất cả interfaces | Ai từ internet | Production |
+
+**Visual**:
+```
+Local Dev:
+    app.run(debug=True)  →  127.0.0.1:5000  →  Chỉ bạn
+                             ↓
+                        http://localhost:5000
+
+Render Production:
+    app.run(host='0.0.0.0', port=10000)  →  0.0.0.0:10000  →  Ai cũng được
+                                              ↓
+                                    https://quizgenerator.onrender.com
+```
+
+### Port Binding: Dynamic Environment Variable
+
+**Render.com quy định**:
+- Render tự động gán **dynamic port** (thường 10000)
+- Flask phải **đọc** từ environment variable `PORT`
+- Nếu chạy local → default về 5000
+
+**Code**:
+```python
+import os
+port = int(os.environ.get('PORT', 5000))
+#     ↑                       ↑              ↑
+#     Đọc từ OS        lấy từ PORT    default=5000
+app.run(host='0.0.0.0', port=port, debug=False)
+```
+
+**Khi chạy**:
+```bash
+# Local (PORT không set)
+$ python app.py
+Running on http://0.0.0.0:5000
+
+# Render (PORT=10000)
+$ PORT=10000 python app.py
+Running on http://0.0.0.0:10000
+```
+
+### Tóm Tắt 2 Thay Đổi Bắt Buộc
+
+```python
+# REQUIREMENT 1: host='0.0.0.0'
+# Lý do: Render.com là cloud → cần nghe tất cả network interfaces
+app.run(host='0.0.0.0', ...)
+
+# REQUIREMENT 2: Đọc PORT từ environment variable
+# Lý do: Render tự động gán port → Flask cần flexible
+port = int(os.environ.get('PORT', 5000))
+app.run(..., port=port, ...)
+```
+
+### QuizGenerator: Đã Fix ✅
+
+**File**: `app.py` (lines 84-86)
+```python
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
+```
+
+**Status**: ✅ Config chính xác → Ready for Render.com
+
+**Commit**: `cc387f7` - "Fix Flask port binding for Render.com deployment"
+
+---
+
+## 15. Next Steps
 
 1. ✅ Deploy QuizGenerator lên Render.com
 2. ✅ Test endpoints từ URL public
