@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QuizGenerator API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-get {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-get:hover {
+            background-color: #218838;
+        }
+        .btn-post {
+            background-color: #0066cc;
+            color: white;
+        }
+        .btn-post:hover {
+            background-color: #0052a3;
+        }
+        .note {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 QuizGenerator API</h1>
+    
+    <div class="section">
+        <h2>📋 Quiz Endpoints</h2>
+        <div class="buttons-grid">
+            <a href="/api/quizzes" class="btn btn-get">GET /api/quizzes<br><span class="note">List all quizzes</span></a>
+            <a href="/api/quizzes/1" class="btn btn-get">GET /api/quizzes/1<br><span class="note">Get quiz details</span></a>
+            <a href="/api/quizzes/1/results" class="btn btn-get">GET /api/quizzes/1/results<br><span class="note">Get quiz results</span></a>
+            <button class="btn btn-post" onclick="alert('POST /api/quizzes/upload\\nUse Postman or curl')">POST /api/quizzes/upload<br><span class="note">Upload Excel file</span></button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎮 Exam Session Endpoints</h2>
+        <div class="buttons-grid">
+            <button class="btn btn-post" onclick="alert('POST /api/sessions\\nBody: {\\n  quiz_id: 1,\\n  num_questions: 20,\\n  exam_duration: 60\\n}')">POST /api/sessions<br><span class="note">Create exam session</span></button>
+            <a href="/api/sessions/1" class="btn btn-get">GET /api/sessions/1<br><span class="note">Get session details</span></a>
+            <a href="/api/sessions/1/status" class="btn btn-get">GET /api/sessions/1/status<br><span class="note">Check session status</span></a>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✍️ Answer & Submission Endpoints</h2>
+        <div class="buttons-grid">
+            <button class="btn btn-post" onclick="alert('POST /api/sessions/1/answers\\nBody: {\\n  answers: {\\n    1: A,\\n    2: B\\n  }\\n}')">POST /api/sessions/1/answers<br><span class="note">Submit answers</span></button>
+            <button class="btn btn-post" onclick="alert('POST /api/sessions/1/submit')">POST /api/sessions/1/submit<br><span class="note">Final submission</span></button>
+            <button class="btn btn-post" onclick="alert('POST /api/sessions/1/auto-submit')">POST /api/sessions/1/auto-submit<br><span class="note">Auto-submit (timeout)</span></button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Results Endpoints</h2>
+        <div class="buttons-grid">
+            <a href="/api/results/1" class="btn btn-get">GET /api/results/1<br><span class="note">Get exam results</span></a>
+        </div>
+    </div>
+
+    <div class="section" style="background-color: #e7f3ff; border-left: 4px solid #0066cc;">
+        <h3>📝 Ghi chú</h3>
+        <ul>
+            <li><span class="btn btn-get" style="padding: 4px 8px; font-size: 12px;">GET</span> - Click trực tiếp để test</li>
+            <li><span class="btn btn-post" style="padding: 4px 8px; font-size: 12px;">POST</span> - Dùng Postman, curl, hoặc click để xem ví dụ</li>
+            <li>Thay thế ID (1) bằng ID thực tế để test</li>
+        </ul>
+    </div>
+</body>
+</html>
