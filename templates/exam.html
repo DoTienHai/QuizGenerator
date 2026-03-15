@@ -3,8 +3,21 @@
 {% block title %}Làm Bài Kiểm Tra - QuizGenerator{% endblock %}
 
 {% block content %}
-<div id="configSection" style="max-width: 600px; margin: 30px auto;">
+<div id="quizSelectSection" style="max-width: 600px; margin: 30px auto;">
+    <h2>📋 Chọn Bộ Câu Hỏi</h2>
+    <div id="quizList" class="grid" style="margin-top: 20px;"></div>
+    <div id="loadingSpinner" style="text-align: center; padding: 40px;">
+        <p style="color: #667eea;">Đang tải danh sách Quiz...</p>
+    </div>
+</div>
+
+<div id="configSection" style="max-width: 600px; margin: 30px auto; display: none;">
     <h2>⚙️ Cấu Hình Bài Kiểm Tra</h2>
+    <div id="selectedQuizInfo" style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p><strong>📚 Quiz Được Chọn:</strong> <span id="quizNameDisplay"></span></p>
+        <p><strong>📊 Tổng Câu Hỏi:</strong> <span id="totalQuestionsDisplay"></span> câu</p>
+        <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="changeQuiz()">🔄 Chọn Quiz Khác</button>
+    </div>
 
     <form id="configForm" style="margin-top: 30px;">
         <div class="form-group">
@@ -43,16 +56,122 @@
     let remainingTime = 0;
     let timerInterval = null;
     let answers = {};
+    let selectedQuizData = null;
 
-    document.getElementById('configForm').addEventListener('submit', async (e) => {
+    // Load quiz list on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedQuizId = sessionStorage.getItem('selectedQuizId');
+        if (savedQuizId) {
+            // User came from quiz list page
+            loadConfigSection();
+        } else {
+            // User came directly to exam page - show quiz selection
+            loadQuizzes();
+        }
+    });
+
+    async function loadQuizzes() {
+        try {
+            const quizSelectSection = document.getElementById('quizSelectSection');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const quizListContainer = document.getElementById('quizList');
+
+            const response = await fetch('/api/quizzes');
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi tải danh sách Quiz');
+            }
+
+            const quizzes = data.quizzes || [];
+
+            if (quizzes.length === 0) {
+                quizListContainer.innerHTML = '<p style="text-align: center; color: #999;">📭 Chưa có Quiz nào. Vui lòng tải Quiz trước!</p>';
+                loadingSpinner.style.display = 'none';
+                return;
+            }
+
+            loadingSpinner.style.display = 'none';
+            quizListContainer.innerHTML = '';
+
+            quizzes.forEach(quiz => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.cursor = 'pointer';
+                card.style.transition = 'all 0.3s';
+                card.innerHTML = `
+                    <h3>${quiz.name || `Quiz #${quiz.id}`}</h3>
+                    <p style="color: #666;">📚 <strong>${quiz.total_questions || 0}</strong> câu hỏi</p>
+                    <button type="button" class="btn btn-success" onclick="selectQuiz(${quiz.id}, '${quiz.name}', ${quiz.total_questions})">
+                        ✅ Chọn Bộ Này
+                    </button>
+                `;
+                quizListContainer.appendChild(card);
+            });
+
+        } catch (error) {
+            showMessage(`❌ ${error.message}`, 'error');
+        }
+    }
+
+    function selectQuiz(quizId, quizName, totalQuestions) {
+        // Save to session storage
+        sessionStorage.setItem('selectedQuizId', quizId);
+        sessionStorage.setItem('selectedQuizName', quizName);
+        sessionStorage.setItem('selectedQuizTotal', totalQuestions);
+
+        selectedQuizData = {
+            id: quizId,
+            name: quizName,
+            total_questions: totalQuestions
+        };
+
+        // Update max num_questions
+        document.getElementById('numQuestions').max = totalQuestions;
+
+        loadConfigSection();
+    }
+
+    function loadConfigSection() {
+        const quizSelectSection = document.getElementById('quizSelectSection');
+        const configSection = document.getElementById('configSection');
+        
+        const quizName = sessionStorage.getItem('selectedQuizName') || 'Unknown';
+        const totalQuestions = sessionStorage.getItem('selectedQuizTotal') || '0';
+
+        document.getElementById('quizNameDisplay').textContent = quizName;
+        document.getElementById('totalQuestionsDisplay').textContent = totalQuestions;
+        document.getElementById('numQuestions').max = parseInt(totalQuestions);
+
+        quizSelectSection.style.display = 'none';
+        configSection.style.display = 'block';
+
+        showMessage(`✅ Đã chọn: ${quizName}`, 'success');
+    }
+
+    function changeQuiz() {
+        // Clear selection
+        sessionStorage.removeItem('selectedQuizId');
+        sessionStorage.removeItem('selectedQuizName');
+        sessionStorage.removeItem('selectedQuizTotal');
+        selectedQuizData = null;
+
+        // Show quiz selection again
+        document.getElementById('configSection').style.display = 'none';
+        document.getElementById('quizSelectSection').style.display = 'block';
+    }
+
+    document.getElementById('configForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const quizId = sessionStorage.getItem('selectedQuizId');
+        const quizId = parseInt(sessionStorage.getItem('selectedQuizId'));
         const numQuestions = parseInt(document.getElementById('numQuestions').value);
         const duration = parseInt(document.getElementById('duration').value);
+        const totalQuestions = parseInt(sessionStorage.getItem('selectedQuizTotal'));
 
-        if (!quizId) {
-            showMessage('❌ Vui lòng chọn quiz trước', 'error');
+        // Validate
+        if (numQuestions > totalQuestions) {
+            showMessage(`❌ Số câu vượt quá tổng câu hỏi (${totalQuestions})`, 'error');
             return;
         }
 
@@ -65,7 +184,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    quiz_id: parseInt(quizId),
+                    quiz_id: quizId,
                     num_questions: numQuestions,
                     exam_duration: duration
                 })
