@@ -1,13 +1,11 @@
 # Thinking Checklist: Design & Code Quality
 
-**Purpose**: Universal framework for self-evaluation of software design and code quality  
-**Created**: 2026-03-15  
-**Scope**: General principles applicable to any project
+**Ngày tạo**: 2026-03-15  
+**Mục đích**: Khung công việc toàn cầu để đánh giá chất lượng thiết kế phần mềm và code
 
 ---
 
-## Table of Contents
-
+## Mục Lục
 - [Design Thinking Questions](#design-thinking-questions)
 - [Code Quality Questions](#code-quality-questions)
 - [Architecture Questions](#architecture-questions)

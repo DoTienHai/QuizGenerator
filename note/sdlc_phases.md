@@ -1,7 +1,22 @@
 # SDLC Phases (Software Development Life Cycle)
 
-**Created**: 2026-03-15  
-**Purpose**: Document the major phases of Software Development Life Cycle
+**Ngày tạo**: 2026-03-15  
+**Mục đích**: Tài liệu các giai đoạn của Software Development Life Cycle và ứng dụng với QuizGenerator
+
+---
+
+## Mục Lục
+- [Overview](#overview)
+- [Phase 1: Requirement Analysis](#phase-1-requirement-analysis)
+- [Phase 2: Detail Design](#phase-2-detail-design)
+- [Phase 3: Development](#phase-3-development-implementation)
+- [Phase 4: Testing](#phase-4-testing)
+- [Phase 5: Deployment](#phase-5-deployment)
+- [Phase 6: Maintenance](#phase-6-maintenance--support)
+- [Relationship to QuizGenerator](#relationship-to-quizgenerator-project)
+- [Development Model](#quizgenerator-development-model)
+- [Key Principles](#key-principles)
+- [Metrics & Success](#metrics--success-criteria)
 
 ---
 

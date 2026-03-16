@@ -9,10 +9,11 @@ applyTo: 'khi người dùng bắt đầu message với "note" hoặc "note ..."
 - Khi người dùng chat bắt đầu với "note" hoặc "note ..." (ví dụ: "note cấu trúc project", "note lỗi trong validation")
 
 ## Quy tắc đặt tên file Note
-- **Format**: `tieude_ngan.md`
-- **Ví dụ**: `cau_truc_project.md`, `config_user_quiz.md`
-- Sử dụng chữ thường, dấu gạch dưới thay khoảng trắng
+- **Format**: `short_title_in_english.md`
+- **Ví dụ**: `project_structure.md`, `user_quiz_config.md`, `uuid_explanation.md`
+- Sử dụng **tiếng Anh**, chữ thường, dấu gạch dưới thay khoảng trắng
 - Tên file ngắn gọn, mô tả nội dung chính
+- **Không** sử dụng tiếng Việt trong tên file
 
 ## Cấu trúc Header của file Note
 ```markdown
@@ -48,7 +49,7 @@ summary: Tổng hợp cấu trúc project QuizGenerator và các components chí
 ```markdown
 ---
 date: 2026-03-03 10:45
-summary: Ghi chép cấu trúc folder và flow của ứng dụng QuizGenerator
+summary: Tổng hợp cấu trúc folder và flow của ứng dụng QuizGenerator
 ---
 
 ## Mục Lục
@@ -75,6 +76,8 @@ QuizGenerator/
 └── utils/
 ```
 ```
+
+**File name ví dụ**: `project_structure.md` hoặc `quizgenerator_architecture.md`
 
 ## Vị trí lưu file
 Tất cả file note sẽ được lưu trong folder: `QuizGenerator/note/`

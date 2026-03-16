@@ -5,6 +5,15 @@
 
 ---
 
+## Mục Lục
+- [Cách Hoạt Động](#1-cach-hoat-dong-request--be-xu-ly--response)
+- [Ví Dụ GET](#2-vi-du-chi-tiet-get-apiquizzes1)
+- [Ví Dụ POST](#3-vi-du-chi-tiet-post-apisessions)
+- [Response Types](#4-response-types-cac-truong-hop-khac-nhau)
+- [Tóm Tắt](#5-tom-tat-be-xu-ly-gi-truoc-khi-return-response)
+
+---
+
 ## 1. Cách Hoạt Động: Request → BE Xử Lý → Response
 
 ### Flow Đơn Giản (3 bước)

@@ -5,6 +5,22 @@
 
 ---
 
+## Mục Lục
+- [API là gì?](#1-api-la-gi)
+- [Loại API](#2-loai-api)
+- [HTTP Methods](#3-http-methods-verbs)
+- [HTTP Status Codes](#4-http-status-codes)
+- [Request & Response Structure](#5-request--response-structure)
+- [Response Format](#6-response-format---best-practice)
+- [API Design Best Practices](#7-api-design-best-practices)
+- [API Development Workflow](#8-api-development-workflow)
+- [Cách Test API](#9-cach-test-api)
+- [Common Mistakes](#10-common-api-mistakes--solutions)
+- [QuizGenerator API Summary](#11-quizgenerator-api-summary)
+- [Key Takeaways](#12-key-takeaways)
+
+---
+
 ## 1. API là gì?
 
 **API** = Application Programming Interface

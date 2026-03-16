@@ -5,6 +5,25 @@
 
 ---
 
+## Mục Lục
+- [Render.com là gì?](#1-rendercom-la-gi)
+- [Các Alternatives](#2-cac-alternatives-so-sanh)
+- [Free Plan](#3-free-plan---chi-tiet)
+- [Deployment Steps](#4-deployment-steps-chi-tiet)
+- [Cấu Trúc File Deploy](#5-cau-truc-file-deploy)
+- [Auto-Deploy & Updates](#6-auto-deploy--updates)
+- [Logs & Debugging](#7-logs--debugging)
+- [Environment Variables](#8-environment-variables)
+- [Database Deployment](#9-database-deployment)
+- [Lifecycle](#10-lifecycle---khi-deploy-xong)
+- [Paid Plans](#11-paid-plans--upgrades)
+- [Deployment Checklist](#12-quizgenerator-deployment-checklist)
+- [Tóm Tắt](#13-tom-tat)
+- [Flask Configuration](#14-critical-flask-host--port-configuration)
+- [Next Steps](#15-next-steps)
+
+---
+
 ## 1. Render.com là gì?
 
 **Render.com** là một **cloud platform** để deploy & host web applications.

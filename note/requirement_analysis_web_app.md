@@ -1,9 +1,9 @@
----
-date: 2026-03-14 
-summary: Dàn dựng các bước phân tích requirement cho một web app từ thông tin input đến output
----
-
 # Requirement Analysis cho Web App
+
+**Ngày tạo**: 2026-03-14  
+**Mục đích**: Dàn dựng các bước phân tích requirement cho một web app từ thông tin input đến output
+
+---
 
 ## Mục Lục
 - [Bước 1: Xác định thông tin cơ bản](#buoc-1-xac-dinh-thong-tin-co-ban)
