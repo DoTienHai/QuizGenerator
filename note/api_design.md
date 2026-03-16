@@ -156,6 +156,8 @@ POST /api/updateQuiz?id=1             → Action trong URL
 POST /api/deleteQuiz?id=1             → DELETE dùng POST method
 ```
 
+---
+
 #### Ví Dụ Thực Tế: QuizGenerator
 ```
 Tạo phiên thi mới:
