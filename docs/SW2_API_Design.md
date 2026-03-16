@@ -334,7 +334,7 @@ session_id: String (UUID format, required)
 
 **Path Parameters**:
 ```
-session_id: String (required)
+session_id: String (UUID format, required)
 ```
 
 **Request**:
@@ -378,6 +378,11 @@ session_id: String (required)
 **Endpoint**: `POST /api/sessions/{session_id}/submit`
 
 **Purpose**: Submit all answers and complete exam
+
+**Path Parameters**:
+```
+session_id: String (UUID format, required)
+```
 
 **Request**:
 ```json
@@ -440,6 +445,11 @@ session_id: String (required)
 
 **Purpose**: Automatically submit when timer reaches 0:00
 
+**Path Parameters**:
+```
+session_id: String (UUID format, required)
+```
+
 **Request**:
 ```json
 {
@@ -474,7 +484,7 @@ session_id: String (required)
 
 **Path Parameters**:
 ```
-session_id: String (required)
+session_id: String (UUID format, required)
 ```
 
 **Response (Success - 200)**:
