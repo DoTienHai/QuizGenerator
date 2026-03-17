@@ -50,13 +50,13 @@ v1 (Current)
 
 #### 1.1 Upload Quiz (Excel File)
 
-**Endpoint**: `POST /api/quizzes/upload`
+**Endpoint**: `POST /api/quizzes`
 
-**Purpose**: Upload Excel file with questions
+**Purpose**: Upload Excel file with questions (create new quiz)
 
 **Request**:
 ```
-POST /api/quizzes/upload HTTP/1.1
+POST /api/quizzes HTTP/1.1
 Content-Type: multipart/form-data
 
 Body:

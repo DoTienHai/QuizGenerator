@@ -2,9 +2,9 @@ from flask import Blueprint, jsonify
 
 quiz_bp = Blueprint('quiz', __name__, url_prefix='/api')
 
-@quiz_bp.route('/quizzes/upload', methods=['POST'])
+@quiz_bp.route('/quizzes', methods=['POST'])
 def upload_quiz():
-    """Upload Excel file with questions"""
+    """Upload Excel file with questions (create quiz)"""
     return jsonify({'message': 'Upload quiz endpoint'}), 201
 
 @quiz_bp.route('/quizzes', methods=['GET'])
