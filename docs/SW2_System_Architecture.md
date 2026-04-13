@@ -1,9 +1,8 @@
 # SW2: System Architecture Design - QuizGenerator
 
-**Last Updated**: 2026-03-15  
-**Version**: 1.0  
-**Status**: Design Phase  
-**Author**: AI Assistant
+**Last Updated**: 2026-04-13  
+**Version**: 1.2  
+**Status**: Implementation (Session→Exam Refactor, QuizStats Added)
 
 ---
 
@@ -77,19 +76,22 @@ Model-View-Controller (MVC) adapted for Flask
 ```
 QuizGenerator Application
 ├── Frontend Layer
-│   ├── Home Page (index.html)
-│   ├── Upload Page (upload.html)
-│   ├── Config Page (config.html)
-│   ├── Exam Page (exam.html)
-│   └── Results Page (results.html)
+│   ├── Upload Page (upload.html) - Default landing page
+│   ├── Quiz List Page (list-quizzes.html) - Table view of all quizzes
+│   ├── Exam Page (exam.html / exam-do route)
+│   ├── Quiz Stats Page (quiz-stats.html) - Statistics and results
+│   └── Results Page (results.html) - Detailed answer review
 │
 ├── Application Layer (Flask)
 │   ├── app.py (Main Flask app)
 │   ├── Routes
-│   │   ├── /upload (POST)
-│   │   ├── /config (GET, POST)
-│   │   ├── /exam (GET, POST)
-│   │   └── /results/<session_id> (GET)
+│   │   ├── GET / → Upload page
+│   │   ├── POST /api/quizzes → Upload quiz (Excel)
+│   │   ├── GET /list-quizzes → Quiz list page
+│   │   ├── GET /exam-do → Exam page (prepare & take)
+│   │   ├── GET /quiz-stats → Statistics & results
+│   │   ├── GET /results → Detailed answer review
+│   │   └── API Routes (see SW2_API_Design.md)
 │   └── Utilities
 │       ├── File handler
 │       └── Session manager
@@ -151,12 +153,11 @@ QuizGenerator Application
 **Components**:
 - `app.py`: Flask app initialization
 - Routes (endpoints):
-  - `GET /` → Home page
-  - `POST /upload` → Handle Excel upload
-  - `GET /config`, `POST /config` → Quiz configuration
-  - `GET /exam` → Display exam
-  - `POST /submit` → Submit answers
-  - `GET /results/<session_id>` → Display results
+  - `GET /` → Upload page (main landing)
+  - `POST /api/quizzes` → Handle Excel file upload (API)
+  - `GET /list-quizzes` → Quiz listing page
+  - `GET /exam` → Exam page
+  - `GET /results` → Results page
 - Middleware:
   - Error handling
   - Request validation

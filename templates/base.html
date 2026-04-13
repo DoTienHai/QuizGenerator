@@ -88,27 +88,27 @@
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: #764ba2;
         }
 
         .btn-secondary:hover {
-            background: #5a6268;
+            background: #63408a;
         }
 
         .btn-success {
-            background: #28a745;
+            background: #667eea;
         }
 
         .btn-success:hover {
-            background: #218838;
+            background: #5568d3;
         }
 
         .btn-danger {
-            background: #dc3545;
+            background: #7c3aed;
         }
 
         .btn-danger:hover {
-            background: #c82333;
+            background: #6d28d9;
         }
 
         .message {
@@ -322,10 +322,8 @@
         </header>
 
         <nav>
-            <a href="/">🏠 Trang Chủ</a>
-            <a href="/upload">📤 Tải Quiz</a>
+            <a href="/">📤 Tải Quiz</a>
             <a href="/list-quizzes">📋 Danh Sách Quiz</a>
-            <a href="/exam">🎮 Làm Bài</a>
         </nav>
 
         <main>
@@ -333,52 +331,11 @@
         </main>
 
         <footer>
-            <p>&copy; 2026 QuizGenerator - Powered by Flask | <a href="https://github.com" style="color: #667eea;">GitHub</a></p>
+            <p>&copy; 2026 QuizGenerator - Powered by Flask | <a href="https://github.com/DoTienHai/QuizGenerator" style="color: #667eea;">GitHub</a></p>
         </footer>
     </div>
 
-    <script>
-        // Utility function to show messages
-        function showMessage(message, type = 'info') {
-            const container = document.createElement('div');
-            container.className = `message ${type}`;
-            container.textContent = message;
-            document.querySelector('main').insertBefore(container, document.querySelector('main').firstChild);
-
-            if (type !== 'success' && type !== 'error') {
-                setTimeout(() => container.remove(), 3000);
-            }
-        }
-
-        // Utility function for API calls
-        async function apiCall(endpoint, method = 'GET', data = null) {
-            try {
-                const options = {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                };
-
-                if (data) {
-                    options.body = JSON.stringify(data);
-                }
-
-                const response = await fetch(endpoint, options);
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || `HTTP error! status: ${response.status}`);
-                }
-
-                return result;
-            } catch (error) {
-                console.error('API Error:', error);
-                showMessage(`Lỗi: ${error.message}`, 'error');
-                throw error;
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

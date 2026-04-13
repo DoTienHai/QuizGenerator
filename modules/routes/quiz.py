@@ -29,14 +29,26 @@ def upload_quiz():
         quiz_name = request.form.get('quiz_name').strip()
         
         # Validate file type
-        if not file.filename.endswith('.xlsx'):
-            return jsonify({'success': False, 'message': 'Only .xlsx files are accepted'}), 400
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'success': False, 'message': 'Only Excel files (.xlsx, .xls) are accepted'}), 400
         
         # Read file content
         file_content = file.read()
         
-        # Import quiz from Excel
-        result = ExcelImportService.import_excel_as_quiz(file_content, quiz_name)
+        # Initialize ExcelImportService with file
+        service = ExcelImportService(file_content)
+        
+        # Validate file structure
+        if not service.validate():
+            return jsonify({'success': False, 'message': service.error_message}), 400
+        
+        # Parse Excel file
+        parse_result = service.parse(quiz_name)
+        if not parse_result['success']:
+            return jsonify({'success': False, 'message': parse_result['message']}), 400
+        
+        # Import as quiz
+        result = service.import_as_quiz(quiz_name)
         
         if result['success']:
             return jsonify({

@@ -218,10 +218,12 @@ class ExamService:
             return {'success': False, 'message': f"Error submitting answer: {str(e)}"}
 
     @staticmethod
-    def submit_exam(session_id):
+    def submit_exam(session_id, answers=None):
         """
         Submit exam (final submission)
-        Args: session_id (str) - Session UUID
+        Args: 
+            session_id (str) - Session UUID
+            answers (dict) - User answers {question_id: user_answer, ...}
         Returns: dict - {'success': bool, 'data': result_obj or None, 'message': str}
         """
         # Validate session
@@ -235,6 +237,33 @@ class ExamService:
             return {'success': False, 'data': None, 'message': error_msg}
         
         try:
+            # Update user answers with provided answers and check correctness
+            if answers and isinstance(answers, dict):
+                for question_id_str, answer in answers.items():
+                    try:
+                        question_id = int(question_id_str)
+                        # Find and update the UserAnswer record
+                        user_answer_record = UserAnswer.query.filter_by(
+                            session_id=session_id,
+                            question_id=question_id
+                        ).first()
+                        
+                        if user_answer_record:
+                            user_answer_record.user_answer = answer if answer else None
+                            user_answer_record.answered_at = datetime.utcnow()
+                            
+                            # Determine if answer is correct
+                            if answer:  # Only mark correct/incorrect if answer provided
+                                question = Question.query.get(question_id)
+                                if question:
+                                    # Compare user answer with correct answer
+                                    user_answer_record.is_correct = (answer.upper() == question.correct_answer.upper())
+                            else:  # No answer = skipped
+                                user_answer_record.is_correct = None
+                                
+                    except (ValueError, TypeError):
+                        pass  # Skip invalid question IDs
+            
             # Update session status
             session.status = 'submitted'
             
@@ -250,15 +279,23 @@ class ExamService:
                     'message': f"Error calculating score: {result_data['message']}"
                 }
             
+            # Calculate time spent in seconds
+            time_spent_seconds = None
+            if session.created_at:
+                time_diff = datetime.utcnow() - session.created_at
+                time_spent_seconds = int(time_diff.total_seconds())  # Total seconds
+            
             # Create ExamResult record
             exam_result = ExamResult(
                 session_id=session_id,
+                quiz_id=session.quiz_id,
                 score=result_data['data']['score'],
                 correct_count=result_data['data']['correct_count'],
                 incorrect_count=result_data['data']['incorrect_count'],
                 skipped_count=result_data['data']['skipped_count'],
-                status='completed',
-                submitted_at=datetime.utcnow()
+                status='PASS' if result_data['data']['score'] >= 80 else 'FAIL',
+                submitted_at=datetime.utcnow(),
+                time_spent_seconds=time_spent_seconds
             )
             
             db.session.add(exam_result)

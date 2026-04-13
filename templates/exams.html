@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Danh Sách Bài Làm - QuizGenerator{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 30px auto;">
+    <h2>📋 Danh Sách Bài Làm Của Bạn</h2>
+    
+    <div id="examsList" style="margin-top: 30px;">
+        <div style="text-align: center; padding: 40px;">
+            <p style="color: #667eea;">Đang tải danh sách bài làm...</p>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/exams.js') }}"></script>
+{% endblock %}

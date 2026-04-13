@@ -189,7 +189,6 @@ class UserAnswer(db.Model):
     )
     is_correct = db.Column(db.Boolean)  # Computed after submission
     answered_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    time_to_answer = db.Column(db.Integer)  # in seconds
 
     # Relationships
     session = db.relationship('ExamSession', back_populates='user_answers')
@@ -234,9 +233,9 @@ class ExamResult(db.Model):
     status = db.Column(
         db.String(10),
         db.CheckConstraint("status IN ('PASS', 'FAIL')")
-    )  # Pass if score >= 70
+    )  # Pass if score >= 80
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    time_spent_minutes = db.Column(db.Integer)
+    time_spent_seconds = db.Column(db.Integer)
 
     # Relationships
     session = db.relationship('ExamSession', back_populates='exam_result')

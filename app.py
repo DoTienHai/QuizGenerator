@@ -7,7 +7,7 @@ from config import get_config
 from modules.models import db
 from modules.routes.frontend import frontend_bp
 from modules.routes.quiz import quiz_bp
-from modules.routes.session import session_bp
+from modules.routes.exam import exam_bp
 from modules.routes.result import result_bp
 
 
@@ -46,7 +46,7 @@ def create_app(config=None):
     # This connects all routes: /frontend, /api/quizzes, /api/sessions, /api/results
     app.register_blueprint(frontend_bp)
     app.register_blueprint(quiz_bp)
-    app.register_blueprint(session_bp)
+    app.register_blueprint(exam_bp)
     app.register_blueprint(result_bp)
     
     # Step 6: Return configured app instance

@@ -1,8 +1,8 @@
 # SW2: API Design and Contracts - QuizGenerator
 
-**Last Updated**: 2026-03-15  
-**Version**: 1.0  
-**Status**: Design Phase  
+**Last Updated**: 2026-04-13  
+**Version**: 1.2  
+**Status**: Implementation (Session→Exam Refactor, New Endpoints)  
 **Author**: AI Assistant
 
 ---
@@ -68,12 +68,13 @@ Body:
 **Response (Success - 201)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Quiz uploaded successfully",
   "data": {
     "quiz_id": 1,
     "total_questions": 50,
-    "uploaded_at": "2026-03-15T10:30:00Z",
-    "message": "Quiz uploaded successfully"
+    "uploaded_at": "2026-03-15T10:30:00Z"
   }
 }
 ```
@@ -81,12 +82,10 @@ Body:
 **Response (Error - 400)**:
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "INVALID_FILE_FORMAT",
-    "message": "Missing required column: Correct_Answer",
-    "field": "file"
-  }
+  "success": false,
+  "error_code": "ERR_INVALID_FILE_TYPE",
+  "message": "Missing required column: Correct_Answer",
+  "data": null
 }
 ```
 
@@ -116,7 +115,9 @@ Body:
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Quizzes retrieved successfully",
   "data": {
     "quizzes": [
       {
@@ -155,7 +156,9 @@ quiz_id: Integer (required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Quiz details retrieved",
   "data": {
     "quiz_id": 1,
     "total_questions": 50,
@@ -175,11 +178,10 @@ quiz_id: Integer (required)
 **Response (Error - 404)**:
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "QUIZ_NOT_FOUND",
-    "message": "Quiz with ID 999 not found"
-  }
+  "success": false,
+  "error_code": "ERR_QUIZ_NOT_FOUND",
+  "message": "Quiz with ID 999 not found",
+  "data": null
 }
 ```
 
@@ -189,7 +191,7 @@ quiz_id: Integer (required)
 
 #### 2.1 Create Exam Session
 
-**Endpoint**: `POST /api/sessions`
+**Endpoint**: `POST /api/exams`
 
 **Purpose**: Create new exam session with configuration
 
@@ -210,7 +212,9 @@ quiz_id: Integer (required)
 **Response (Success - 201)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Session created successfully",
   "data": {
     "session_id": "abc-123-def-456",
     "quiz_id": 1,
@@ -218,21 +222,7 @@ quiz_id: Integer (required)
     "exam_duration": 60,
     "created_at": "2026-03-15T10:30:00Z",
     "expires_at": "2026-03-16T10:30:00Z",
-    "status": "active",
-    "questions": [
-      {
-        "question_id": 1,
-        "question_text": "What is the capital of France?",
-        "options": {
-          "A": "Berlin",
-          "B": "Paris",
-          "C": "London",
-          "D": "Madrid"
-        },
-        "position": 1
-      },
-      // ... more questions
-    ]
+    "status": "active"
   }
 }
 ```
@@ -240,12 +230,10 @@ quiz_id: Integer (required)
 **Response (Error - 400)**:
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "INVALID_CONFIG",
-    "message": "Cannot select 70 questions (only 50 available)",
-    "field": "num_questions"
-  }
+  "success": false,
+  "error_code": "ERR_MISSING_PARAM",
+  "message": "quiz_id is required",
+  "data": null
 }
 ```
 
@@ -253,7 +241,7 @@ quiz_id: Integer (required)
 
 #### 2.2 Get Exam Session
 
-**Endpoint**: `GET /api/sessions/{session_id}`
+**Endpoint**: `GET /api/exams/{session_id}`
 
 **Purpose**: Retrieve exam session data
 
@@ -265,7 +253,9 @@ session_id: String (UUID format, required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Session retrieved successfully",
   "data": {
     "session_id": "abc-123-def-456",
     "quiz_id": 1,
@@ -273,20 +263,7 @@ session_id: String (UUID format, required)
     "exam_duration": 60,
     "created_at": "2026-03-15T10:30:00Z",
     "expires_at": "2026-03-16T10:30:00Z",
-    "status": "active",
-    "time_elapsed_seconds": 120,
-    "questions": [
-      {
-        "question_id": 1,
-        "question_text": "What is the capital of France?",
-        "options": {
-          "A": "Berlin",
-          "B": "Paris",
-          "C": "London",
-          "D": "Madrid"
-        }
-      }
-    ]
+    "status": "active"
   }
 }
 ```
@@ -294,11 +271,10 @@ session_id: String (UUID format, required)
 **Response (Error - 404)**:
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "SESSION_NOT_FOUND",
-    "message": "Session not found or expired"
-  }
+  "success": false,
+  "error_code": "ERR_SESSION_NOT_FOUND",
+  "message": "Session not found or expired",
+  "data": null
 }
 ```
 
@@ -306,14 +282,16 @@ session_id: String (UUID format, required)
 
 #### 2.3 Check Session Status
 
-**Endpoint**: `GET /api/sessions/{session_id}/status`
+**Endpoint**: `GET /api/exams/{session_id}/status`
 
 **Purpose**: Quick check if session is still active
 
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Session status retrieved",
   "data": {
     "session_id": "abc-123-def-456",
     "session_status": "active",
@@ -348,26 +326,20 @@ session_id: String (UUID format, required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
-  "data": {
-    "answer_id": 1,
-    "session_id": "abc-123-def-456",
-    "question_id": 1,
-    "user_answer": "B",
-    "answered_at": "2026-03-15T10:32:00Z",
-    "message": "Answer recorded"
-  }
+  "success": true,
+  "error_code": "",
+  "message": "Answer recorded",
+  "data": null
 }
 ```
 
 **Response (Error - 400)**:
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "INVALID_ANSWER",
-    "message": "Invalid answer value. Must be A, B, C, or D"
-  }
+  "success": false,
+  "error_code": "ERR_INVALID_ANSWER",
+  "message": "Invalid answer value. Must be A, B, C, D, or empty",
+  "data": null
 }
 ```
 
@@ -375,7 +347,7 @@ session_id: String (UUID format, required)
 
 #### 3.2 Submit All Answers (Batch)
 
-**Endpoint**: `POST /api/sessions/{session_id}/submit`
+**Endpoint**: `POST /api/exams/{session_id}/submit`
 
 **Purpose**: Submit all answers and complete exam
 
@@ -387,40 +359,28 @@ session_id: String (UUID format, required)
 **Request**:
 ```json
 {
-  "answers": [
-    {
-      "question_id": 1,
-      "user_answer": "A"
-    },
-    {
-      "question_id": 2,
-      "user_answer": "B"
-    },
-    {
-      "question_id": 3,
-      "user_answer": null
-    }
-  ],
-  "time_spent_seconds": 1800
+  "answers": {
+    "1": "A",
+    "2": "B",
+    "3": ""
+  }
 }
 ```
 
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Exam submitted successfully",
   "data": {
-    "result_id": 1,
     "session_id": "abc-123-def-456",
     "quiz_id": 1,
     "score": 75.00,
     "status": "PASS",
-    "total_questions": 20,
-    "correct_answers": 15,
-    "incorrect_answers": 4,
-    "skipped_answers": 1,
-    "time_spent_minutes": 30,
-    "time_allotted_minutes": 60,
+    "correct_count": 15,
+    "incorrect_count": 4,
+    "skipped_count": 1,
     "submitted_at": "2026-03-15T11:00:00Z"
   }
 }
@@ -429,11 +389,10 @@ session_id: String (UUID format, required)
 **Response (Error - 400)**:
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "SESSION_EXPIRED",
-    "message": "Exam session has expired"
-  }
+  "success": false,
+  "error_code": "ERR_SESSION_EXPIRED",
+  "message": "Exam session has expired",
+  "data": null
 }
 ```
 
@@ -441,7 +400,7 @@ session_id: String (UUID format, required)
 
 #### 3.3 Auto-Submit (Timer Expired)
 
-**Endpoint**: `POST /api/sessions/{session_id}/auto-submit`
+**Endpoint**: `POST /api/exams/{session_id}/auto-submit`
 
 **Purpose**: Automatically submit when timer reaches 0:00
 
@@ -460,13 +419,13 @@ session_id: String (UUID format, required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Exam auto-submitted due to time limit",
   "data": {
-    "result_id": 1,
     "session_id": "abc-123-def-456",
     "score": 50.00,
     "status": "PASS",
-    "message": "Exam auto-submitted due to time limit",
     "submitted_at": "2026-03-15T11:00:00Z"
   }
 }
@@ -490,37 +449,19 @@ session_id: String (UUID format, required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Results retrieved successfully",
   "data": {
-    "result_id": 1,
     "session_id": "abc-123-def-456",
     "quiz_id": 1,
     "score": 75.00,
     "status": "PASS",
-    "total_questions": 20,
-    "correct_answers": 15,
-    "incorrect_answers": 4,
-    "skipped_answers": 1,
-    "percentage": "75%",
-    "time_spent_minutes": 30,
-    "time_allotted_minutes": 60,
-    "submitted_at": "2026-03-15T11:00:00Z",
-    "question_breakdown": [
-      {
-        "question_id": 1,
-        "question_text": "What is 2+2?",
-        "user_answer": "B",
-        "correct_answer": "B",
-        "is_correct": true
-      },
-      {
-        "question_id": 2,
-        "question_text": "What is 3+3?",
-        "user_answer": "A",
-        "correct_answer": "B",
-        "is_correct": false
-      }
-    ]
+    "correct_count": 15,
+    "incorrect_count": 4,
+    "skipped_count": 1,
+    "time_spent_seconds": 1800,
+    "submitted_at": "2026-03-15T11:00:00Z"
   }
 }
 ```
@@ -543,19 +484,19 @@ session_id: String (UUID format, required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "All results retrieved",
   "data": {
     "quiz_id": 1,
     "results": [
       {
-        "result_id": 1,
         "session_id": "abc-123-def-456",
         "score": 75.00,
         "status": "PASS",
         "submitted_at": "2026-03-15T11:00:00Z"
       },
       {
-        "result_id": 2,
         "session_id": "def-456-ghi-789",
         "score": 45.00,
         "status": "FAIL",
@@ -580,7 +521,9 @@ session_id: String (UUID format, required)
 **Response (Success - 200)**:
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Statistics retrieved",
   "data": {
     "quiz_id": 1,
     "total_attempts": 5,
@@ -588,7 +531,7 @@ session_id: String (UUID format, required)
     "pass_rate": 80.0,
     "highest_score": 95.00,
     "lowest_score": 45.00,
-    "average_time_spent": 35,
+    "average_time_spent_seconds": 2100,
     "pass_count": 4,
     "fail_count": 1
   }
@@ -603,7 +546,9 @@ session_id: String (UUID format, required)
 
 ```json
 {
-  "status": "success",
+  "success": true,
+  "error_code": "",
+  "message": "Operation completed successfully",
   "data": {
     // Response-specific data
   }
@@ -614,13 +559,10 @@ session_id: String (UUID format, required)
 
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable error message",
-    "field": "field_name (if applicable)",
-    "details": {}  // Additional details (optional)
-  }
+  "success": false,
+  "error_code": "ERROR_CODE",
+  "message": "Human readable error message",
+  "data": null
 }
 ```
 
@@ -645,35 +587,37 @@ X-Response-Time: 125ms
 
 ## Error Handling
 
-### Error Codes
+### Error Codes (18 types)
 
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
-| INVALID_REQUEST | 400 | Malformed request |
-| INVALID_FILE_FORMAT | 400 | File upload invalid format |
-| INVALID_CONFIG | 400 | Quiz config invalid |
-| INVALID_ANSWER | 400 | Answer format invalid |
-| QUIZ_NOT_FOUND | 404 | Quiz doesn't exist |
-| SESSION_NOT_FOUND | 404 | Session doesn't exist |
-| SESSION_EXPIRED | 410 | Session expired (> 24h) |
-| FORBIDDEN | 403 | Access denied |
-| SERVER_ERROR | 500 | Internal server error |
+| `ERR_MISSING_FILE` | 400 | File not provided in request |
+| `ERR_MISSING_PARAM` | 400 | Required parameter missing |
+| `ERR_INVALID_PARAM` | 400 | Invalid parameter value |
+| `ERR_INVALID_FILE_TYPE` | 400 | File format not supported |
+| `ERR_QUIZ_NOT_FOUND` | 404 | Quiz doesn't exist |
+| `ERR_SESSION_NOT_FOUND` | 404 | Session doesn't exist |
+| `ERR_QUESTION_NOT_FOUND` | 404 | Question doesn't exist |
+| `ERR_SESSION_EXPIRED` | 410 | Session expired (> 24h) |
+| `ERR_SESSION_ALREADY_SUBMITTED` | 400 | Cannot modify submitted session |
+| `ERR_INVALID_ANSWER` | 400 | Answer format invalid (must be A/B/C/D) |
+| `ERR_VALIDATION_FAILED` | 400 | Data validation error |
+| `ERR_IMPORT_FAILED` | 400 | Excel import failed |
+| `ERR_DUPLICATE_QUIZ` | 400 | Quiz already exists |
+| `ERR_CALCULATION_ERROR` | 500 | Score calculation error |
+| `ERR_INTERNAL` | 500 | Internal server error |
+| `ERR_FORBIDDEN` | 403 | Access denied |
+| `ERR_SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+| `SUCCESS` | 200/201 | Operation successful (no error) |
 
 ### Error Response Example
 
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "INVALID_CONFIG",
-    "message": "Cannot select 70 questions (only 50 available)",
-    "field": "num_questions",
-    "details": {
-      "max_available": 50,
-      "requested": 70
-    }
-  },
-  "timestamp": "2026-03-15T10:30:00Z"
+  "success": false,
+  "error_code": "ERR_INVALID_PARAM",
+  "message": "Cannot select 70 questions (only 50 available)",
+  "data": null
 }
 ```
 

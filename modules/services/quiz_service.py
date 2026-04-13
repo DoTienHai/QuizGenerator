@@ -182,7 +182,7 @@ class QuizService:
                 }
             
             scores = [r.score for r in results]
-            pass_threshold = 70  # 70% to pass
+            pass_threshold = 80  # 80% to pass
             pass_count = sum(1 for s in scores if s >= pass_threshold)
             
             stats = {
@@ -266,3 +266,12 @@ class QuizService:
         except Exception as e:
             db.session.rollback()
             return {'success': False, 'message': f"Error updating quiz name: {str(e)}"}
+
+if __name__ == '__main__':
+    # Example usage
+    quiz_service = QuizService()
+    result = quiz_service.get_quiz(1)
+    if result['success']:
+        print(result['data'])
+    else:
+        print(result['message'])

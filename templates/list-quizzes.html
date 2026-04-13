@@ -5,85 +5,53 @@
 {% block content %}
 <h2>📋 Danh Sách Tất Cả Quiz</h2>
 
-<div style="margin: 20px 0;">
-    <a href="/upload" class="btn">➕ Tải Quiz Mới</a>
-</div>
-
-<div id="quizList" class="grid"></div>
+<table id="quizTable" class="quiz-table" style="display: none; width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr style="background-color: #667eea; color: white;">
+            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">#</th>
+            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Tên Quiz</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Số Câu Hỏi</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Ngày Tải</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Hành Động</th>
+        </tr>
+    </thead>
+    <tbody id="quizTableBody"></tbody>
+</table>
 
 <div id="noQuizzes" style="text-align: center; padding: 60px 20px;">
     <p style="font-size: 1.2em; color: #999;">📭 Chưa có quiz nào</p>
     <p style="color: #999; margin-bottom: 20px;">Hãy tải quiz mới để bắt đầu!</p>
-    <a href="/upload" class="btn btn-success">📤 Tải Quiz Đầu Tiên</a>
+    <a href="/" class="btn btn-success">📤 Tải Quiz Đầu Tiên</a>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', loadQuizzes);
+<style>
+.quiz-table tbody tr {
+    border-bottom: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
 
-    async function loadQuizzes() {
-        try {
-            showMessage('Đang tải danh sách quiz...', 'info');
-            
-            const response = await fetch('/api/quizzes');
-            const data = await response.json();
+.quiz-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Lỗi tải quiz');
-            }
+.quiz-table tbody td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
 
-            const quizzes = data.quizzes || [];
-            const quizListContainer = document.getElementById('quizList');
-            const noQuizzesDiv = document.getElementById('noQuizzes');
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-            if (quizzes.length === 0) {
-                quizListContainer.style.display = 'none';
-                noQuizzesDiv.style.display = 'block';
-                return;
-            }
+.action-buttons button {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+</style>
 
-            quizListContainer.style.display = 'grid';
-            noQuizzesDiv.style.display = 'none';
-
-            quizzes.forEach(quiz => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <h3>${quiz.name || `Quiz #${quiz.id}`}</h3>
-                    <p style="color: #666; margin: 10px 0;">
-                        📚 <strong>${quiz.total_questions || 0}</strong> câu hỏi
-                    </p>
-                    <p style="color: #666; font-size: 0.9em;">
-                        📅 ${quiz.uploaded_at || 'N/A'}
-                    </p>
-                    <div style="margin-top: 15px;">
-                        <button class="btn btn-success" onclick="startExam(${quiz.id}, '${quiz.name}')">
-                            🎮 Bắt Đầu Làm Bài
-                        </button>
-                        <button class="btn btn-secondary" onclick="viewResults(${quiz.id})">
-                            📊 Xem Kết Quả
-                        </button>
-                    </div>
-                `;
-                quizListContainer.appendChild(card);
-            });
-
-            showMessage(`✅ Tải ${quizzes.length} quiz thành công!`, 'success');
-
-        } catch (error) {
-            showMessage(`❌ ${error.message}`, 'error');
-        }
-    }
-
-    function startExam(quizId, quizName) {
-        // Store quiz info in session storage for exam page
-        sessionStorage.setItem('selectedQuizId', quizId);
-        sessionStorage.setItem('selectedQuizName', quizName);
-        window.location.href = '/exam';
-    }
-
-    function viewResults(quizId) {
-        sessionStorage.setItem('selectedQuizId', quizId);
-        window.location.href = '/results';
-    }
-</script>
+<script src="{{ url_for('static', filename='js/list-quizzes.js') }}"></script>
 {% endblock %}

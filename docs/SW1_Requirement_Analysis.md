@@ -268,7 +268,7 @@ Quiz sessions must be tracked with:
   skipped_answers: int,
   score: decimal(5,2),  # 0.00 to 100.00
   status: 'PASS'/'FAIL',
-  time_spent: minutes
+  time_spent: seconds
 }
 ```
 
@@ -594,7 +594,7 @@ exam_duration: Integer, >= 1 minute
   "incorrect_answers": 4,
   "skipped_answers": 1,
   "submitted_at": "2026-03-14T11:00:00Z",
-  "time_spent_minutes": 30,
+  "time_spent_seconds": 1800,
   "time_allotted_minutes": 45
 }
 ```
@@ -612,7 +612,7 @@ exam_duration: Integer, >= 1 minute
     "correct": 15,
     "incorrect": 4,
     "skipped": 1,
-    "time_spent_minutes": 30,
+    "time_spent_seconds": 1800,
     "time_allotted_minutes": 45
   }
 }

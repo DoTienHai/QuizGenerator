@@ -87,7 +87,7 @@ class DevelopmentConfig(Config):
     #   - Shows: SELECT, INSERT, UPDATE statements as they execute
     #   - Debug: performance issues, see generated SQL, N+1 problems
     #   - Note: disable in production (noise + performance)
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
     
     # ==================== Security (Relaxed for localhost) ====================
     # SESSION_COOKIE_SECURE = False

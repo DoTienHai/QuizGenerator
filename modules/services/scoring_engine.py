@@ -62,8 +62,8 @@ class ScoringEngine:
             # Determine grade
             grade = ScoringEngine._get_grade(score)
             
-            # Pass/Fail (70% threshold)
-            pass_threshold = 70
+            # Pass/Fail (80% threshold)
+            pass_threshold = 80
             is_pass = score >= pass_threshold
             
             result = {

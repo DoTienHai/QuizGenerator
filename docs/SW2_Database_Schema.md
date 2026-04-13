@@ -1,8 +1,8 @@
 # SW2: Database Schema Design - QuizGenerator
 
-**Last Updated**: 2026-03-15  
-**Version**: 1.0  
-**Status**: Design Phase  
+**Last Updated**: 2026-04-13  
+**Version**: 1.1  
+**Status**: Implementation Phase  
 **Author**: AI Assistant
 
 ---
@@ -92,7 +92,7 @@ Single-user application, local file storage
 └──────────────┘  │incorrect_count │
                   │skipped_count   │
                   │submitted_at    │
-                  │time_spent_min  │
+                  │time_spent_sec  │
                   └────────────────┘
 ```
 
@@ -214,7 +214,6 @@ CREATE INDEX idx_session_status ON exam_session(status);
 | `user_answer` | CHAR(1) | NOT NULL, IN ('A','B','C','D','NULL') | User's selected option |
 | `is_correct` | BOOLEAN | COMPUTED (after submission) | Auto-computed: user_answer == correct_answer |
 | `answered_at` | TIMESTAMP | NOT NULL, DEFAULT NOW | Timestamp of submission |
-| `time_to_answer` | INTEGER | Optional | Seconds taken to answer |
 
 **SQL**:
 ```sql
@@ -225,7 +224,6 @@ CREATE TABLE user_answer (
   user_answer CHAR(1) CHECK(user_answer IN ('A','B','C','D',NULL)),
   is_correct BOOLEAN,
   answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  time_to_answer INTEGER,
   FOREIGN KEY(session_id) REFERENCES exam_session(session_id) ON DELETE CASCADE,
   FOREIGN KEY(question_id) REFERENCES question(question_id) ON DELETE RESTRICT,
   UNIQUE(session_id, question_id)
@@ -248,15 +246,13 @@ CREATE INDEX idx_answer_correct ON user_answer(is_correct);
 | `result_id` | INTEGER | PRIMARY KEY, AUTO_INCREMENT | Unique result identifier |
 | `session_id` | TEXT | NOT NULL, UNIQUE, FK | Reference to exam session |
 | `quiz_id` | INTEGER | NOT NULL, FK | Reference to quiz |
-| `total_questions` | INTEGER | NOT NULL | Total questions attempted |
-| `correct_answers` | INTEGER | NOT NULL, ≥ 0 | Count of correct answers |
-| `incorrect_answers` | INTEGER | NOT NULL, ≥ 0 | Count of incorrect answers |
-| `skipped_answers` | INTEGER | NOT NULL, ≥ 0 | Count of skipped questions |
-| `score` | DECIMAL(5,2) | NOT NULL, 0.00-100.00 | Percentage score |
-| `status` | VARCHAR(10) | NOT NULL, IN ('PASS','FAIL') | Pass/Fail status |
-| `submitted_at` | TIMESTAMP | NOT NULL | Submission time |
-| `time_spent_minutes` | INTEGER | NOT NULL, ≥ 0 | Time spent in minutes |
-| `time_allotted_minutes` | INTEGER | NOT NULL, ≥ 0 | Time allowed |
+| `score` | FLOAT | 0-100 | Percentage score |
+| `correct_count` | INTEGER | ≥ 0 | Count of correct answers |
+| `incorrect_count` | INTEGER | ≥ 0 | Count of incorrect answers |
+| `skipped_count` | INTEGER | ≥ 0 | Count of skipped questions |
+| `status` | VARCHAR(10) | IN ('PASS','FAIL') | Pass/Fail status (≥80% for PASS) |
+| `submitted_at` | TIMESTAMP | NOT NULL, DEFAULT NOW | Submission time |
+| `time_spent_seconds` | INTEGER | Optional | Seconds spent on exam |
 
 **SQL**:
 ```sql
@@ -264,15 +260,13 @@ CREATE TABLE exam_result (
   result_id INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id TEXT NOT NULL UNIQUE,
   quiz_id INTEGER NOT NULL,
-  total_questions INTEGER NOT NULL,
-  correct_answers INTEGER NOT NULL CHECK(correct_answers >= 0),
-  incorrect_answers INTEGER NOT NULL CHECK(incorrect_answers >= 0),
-  skipped_answers INTEGER NOT NULL CHECK(skipped_answers >= 0),
-  score DECIMAL(5,2) NOT NULL CHECK(score BETWEEN 0.00 AND 100.00),
-  status VARCHAR(10) NOT NULL CHECK(status IN ('PASS','FAIL')),
+  score FLOAT CHECK(score BETWEEN 0 AND 100),
+  correct_count INTEGER DEFAULT 0,
+  incorrect_count INTEGER DEFAULT 0,
+  skipped_count INTEGER DEFAULT 0,
+  status VARCHAR(10) CHECK(status IN ('PASS','FAIL')),
   submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  time_spent_minutes INTEGER NOT NULL CHECK(time_spent_minutes >= 0),
-  time_allotted_minutes INTEGER NOT NULL CHECK(time_allotted_minutes >= 0),
+  time_spent_seconds INTEGER,
   FOREIGN KEY(session_id) REFERENCES exam_session(session_id) ON DELETE CASCADE,
   FOREIGN KEY(quiz_id) REFERENCES quiz(quiz_id) ON DELETE RESTRICT
 );
@@ -464,8 +458,8 @@ WHERE ua.session_id = ?;
 
 ### Query 6: Store Exam Result
 ```sql
-INSERT INTO exam_result (session_id, quiz_id, total_questions, correct_answers, incorrect_answers, skipped_answers, score, status, time_spent_minutes, time_allotted_minutes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO exam_result (session_id, quiz_id, score, correct_count, incorrect_count, skipped_count, status, time_spent_seconds, submitted_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 ```
 
 ### Query 7: Get Result for Display

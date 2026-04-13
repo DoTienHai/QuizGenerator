@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Làm Bài Kiểm Tra - QuizGenerator{% endblock %}
+
+{% block content %}
+<div id="quizSelectSection" style="max-width: 600px; margin: 30px auto;">
+    <h2>📋 Chọn Bộ Câu Hỏi</h2>
+    <div id="quizList" class="grid" style="margin-top: 20px;"></div>
+    <div id="loadingSpinner" style="text-align: center; padding: 40px;">
+        <p style="color: #667eea;">Đang tải danh sách Quiz...</p>
+    </div>
+</div>
+
+<div id="configSection" style="max-width: 600px; margin: 30px auto; display: none;">
+    <h2>⚙️ Cấu Hình Bài Kiểm Tra</h2>
+    <div id="selectedQuizInfo" style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p><strong>📚 Quiz Được Chọn:</strong> <span id="quizNameDisplay"></span></p>
+        <p><strong>📊 Tổng Câu Hỏi:</strong> <span id="totalQuestionsDisplay"></span> câu</p>
+    </div>
+
+    <form id="configForm" style="margin-top: 30px;">
+        <div class="form-group">
+            <label for="numQuestions">📊 Số Câu Hỏi <span id="questionsRange">(1-50)</span>:</label>
+            <input type="number" id="numQuestions" name="numQuestions" min="1" max="50" value="10" required>
+        </div>
+
+        <div class="form-group">
+            <label for="duration">⏱️ Thời Gian (phút):</label>
+            <input type="number" id="duration" name="duration" min="1" max="180" value="30" required>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 16px;">
+            🎮 Bắt Đầu Làm Bài
+        </button>
+    </form>
+</div>
+
+<div id="examSection" style="display: none;">
+    <div class="timer" id="timer">30:00</div>
+
+    <div id="questionContainer"></div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <button type="button" class="btn btn-success" onclick="submitExam()">
+            ✅ Nộp Bài
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="resetExam()">
+            🔄 Làm Lại
+        </button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+{% endblock %}
