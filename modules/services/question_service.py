@@ -195,8 +195,8 @@ class QuestionService:
                     new_option = updates[option_key].strip()
                     if len(new_option) == 0:
                         return {'success': False, 'message': f"{option_key.upper()} cannot be empty"}
-                    if len(new_option) > 500:
-                        return {'success': False, 'message': f"{option_key.upper()} exceeds 500 characters"}
+                    if len(new_option) > 2000:
+                        return {'success': False, 'message': f"{option_key.upper()} exceeds 2000 characters"}
                     setattr(question, option_key, new_option)
             
             # Update correct answer if provided

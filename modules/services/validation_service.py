@@ -60,8 +60,8 @@ class ValidationService:
             option_text = question_data.get(option_key, '').strip()
             if not option_text or len(option_text) == 0:
                 return False, f"{option_key.upper()} cannot be empty"
-            if len(option_text) > 500:
-                return False, f"{option_key.upper()} must not exceed 500 characters"
+            if len(option_text) > 2000:
+                return False, f"{option_key.upper()} must not exceed 2000 characters"
         
         # Validate correct answer
         correct_answer = str(question_data.get('correct_answer', '')).upper()
