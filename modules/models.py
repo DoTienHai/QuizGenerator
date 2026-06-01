@@ -60,23 +60,23 @@ class Question(db.Model):
         nullable=False
     )
     option_a = db.Column(
-        db.String(500),
-        db.CheckConstraint('LENGTH(option_a) <= 500'),
+        db.String(2000),
+        db.CheckConstraint('LENGTH(option_a) <= 2000'),
         nullable=False
     )
     option_b = db.Column(
-        db.String(500),
-        db.CheckConstraint('LENGTH(option_b) <= 500'),
+        db.String(2000),
+        db.CheckConstraint('LENGTH(option_b) <= 2000'),
         nullable=False
     )
     option_c = db.Column(
-        db.String(500),
-        db.CheckConstraint('LENGTH(option_c) <= 500'),
+        db.String(2000),
+        db.CheckConstraint('LENGTH(option_c) <= 2000'),
         nullable=False
     )
     option_d = db.Column(
-        db.String(500),
-        db.CheckConstraint('LENGTH(option_d) <= 500'),
+        db.String(2000),
+        db.CheckConstraint('LENGTH(option_d) <= 2000'),
         nullable=False
     )
     correct_answer = db.Column(
