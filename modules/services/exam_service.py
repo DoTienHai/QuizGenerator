@@ -293,7 +293,7 @@ class ExamService:
                 correct_count=result_data['data']['correct_count'],
                 incorrect_count=result_data['data']['incorrect_count'],
                 skipped_count=result_data['data']['skipped_count'],
-                status='PASS' if result_data['data']['score'] >= 80 else 'FAIL',
+                status='PASS' if result_data['data']['score'] >= 70 else 'FAIL',
                 submitted_at=datetime.utcnow(),
                 time_spent_seconds=time_spent_seconds
             )

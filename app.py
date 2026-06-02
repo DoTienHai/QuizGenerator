@@ -2,6 +2,7 @@
 QuizGenerator - Flask Application
 """
 import os
+import click
 from flask import Flask
 from config import get_config
 from modules.models import db
@@ -59,6 +60,30 @@ def create_app(config=None):
 # Reason: Other modules, tests, and Gunicorn need to import this app
 # Example: from app import app
 app = create_app()
+
+
+@app.cli.command('fix-pass-status')
+@click.option('--threshold', default=70, help='Pass threshold percentage (default: 70)')
+@click.option('--dry-run', is_flag=True, help='Preview changes without saving')
+def fix_pass_status(threshold, dry_run):
+    """Fix ExamResult records where score >= threshold but status is FAIL."""
+    from modules.models import ExamResult
+    records = ExamResult.query.filter(
+        ExamResult.score >= threshold,
+        ExamResult.status == 'FAIL'
+    ).all()
+    click.echo(f"Found {len(records)} record(s) with score >= {threshold}% marked as FAIL.")
+    if not records:
+        return
+    for r in records:
+        click.echo(f"  result_id={r.result_id}  score={r.score}%  -> PASS")
+    if dry_run:
+        click.echo("Dry run — no changes saved.")
+        return
+    for r in records:
+        r.status = 'PASS'
+    db.session.commit()
+    click.echo(f"Done. Updated {len(records)} record(s) to PASS.")
 
 
 if __name__ == '__main__':

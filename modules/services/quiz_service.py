@@ -182,7 +182,7 @@ class QuizService:
                 }
             
             scores = [r.score for r in results]
-            pass_threshold = 80  # 80% to pass
+            pass_threshold = 70  # 70% to pass
             pass_count = sum(1 for s in scores if s >= pass_threshold)
             
             stats = {
