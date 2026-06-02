@@ -12,6 +12,20 @@ from modules.routes.exam import exam_bp
 from modules.routes.result import result_bp
 
 
+def _backfill_pass_status():
+    """One-time fix: update FAIL records with score >= 70 to PASS."""
+    from modules.models import ExamResult
+    records = ExamResult.query.filter(
+        ExamResult.score >= 70,
+        ExamResult.status == 'FAIL'
+    ).all()
+    if records:
+        for r in records:
+            r.status = 'PASS'
+        db.session.commit()
+        print(f"✓ Backfill: updated {len(records)} record(s) from FAIL to PASS")
+
+
 def create_app(config=None):
     """Application factory function - initialize Flask app with all settings and database"""
     # Step 1: Create Flask app instance
@@ -41,6 +55,7 @@ def create_app(config=None):
         db.create_all()
         print(f"✓ Database initialized: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
         print(f"✓ Tables created (quiz, question, exam_session, user_answer, exam_result)")
+        _backfill_pass_status()
     
     # Step 5: Register blueprints (route handlers)
     # Blueprint = group of routes (like modules)
