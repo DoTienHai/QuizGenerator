@@ -99,16 +99,16 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     """Testing environment - unit tests with isolated database"""
-    
+
     # ==================== Flask Settings ====================
     # DEBUG = True
     #   - Include: useful debugging info during test execution
     DEBUG = True
-    
+
     # TESTING = True
     #   - Disable: request context exceptions (allows testing without app context)
     TESTING = True
-    
+
     # ==================== Database ====================
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     #   - Database: in-memory SQLite (exists only during test run)
@@ -116,40 +116,49 @@ class TestingConfig(Config):
     #   - Speed: fast execution (no disk I/O)
     #   - Isolation: no side effects between tests, no data persistence
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-    
+
     # SQLALCHEMY_ECHO = False
     #   - Quiet: don't log SQL queries (cleaner test output)
     SQLALCHEMY_ECHO = False
-    
+
     # ==================== Security ====================
     # SESSION_COOKIE_SECURE = False
     #   - Allow: HTTP cookies in tests (tests run on localhost)
     SESSION_COOKIE_SECURE = False
 
 
+class ProductionConfig(Config):
+    """Production environment - Render deployment with PostgreSQL"""
+
+    # ==================== Flask Settings ====================
+    DEBUG = False
+    TESTING = False
+
+    # ==================== Database ====================
+    # SQLALCHEMY_ECHO = False
+    #   - Quiet: don't log SQL queries in production (cleaner logs)
+    SQLALCHEMY_ECHO = False
+
+    # ==================== PostgreSQL Configuration ====================
+    # Render injects DATABASE_URL as "postgres://..." but SQLAlchemy 2.x requires "postgresql://"
+    # This auto-detection and conversion ensures compatibility with Render's database URL format
+    _db_url = os.environ.get('DATABASE_URL', '')
+    SQLALCHEMY_DATABASE_URI = _db_url.replace('postgres://', 'postgresql://', 1)
+
+
 # ==================== Config Selector ====================
 def get_config():
     """
-    Get application configuration
-    
-    Current behavior:
-    - Uses DevelopmentConfig (hardcoded for MVP development)
-    - SQLite database: quiz_generator.db
-    - Auto-reload enabled: DEBUG=True
-    - SQL queries logged: SQLALCHEMY_ECHO=True
-    
-    Available configurations:
-    - DevelopmentConfig: SQLite, DEBUG=True, detailed logging, localhost
-    - TestingConfig: In-memory DB, fast unit tests, isolated
+    Get application configuration based on environment.
+    - DATABASE_URL present (Render/production): ProductionConfig with PostgreSQL
+    - No DATABASE_URL (local dev): DevelopmentConfig with SQLite
     """
-    # Hardcoded to development (MVP stage)
-    env = 'development'
-    
-    # Map environment names to config classes
+    if os.environ.get('DATABASE_URL'):
+        return ProductionConfig
+
     config_map = {
-        'development': DevelopmentConfig,      # SQLite, DEBUG=True, SQLALCHEMY_ECHO=True
-        'testing': TestingConfig,              # In-memory DB, DEBUG=True
+        'development': DevelopmentConfig,
+        'testing': TestingConfig,
     }
-    
-    # Return the appropriate config class for environment
+    env = os.environ.get('FLASK_ENV', 'development')
     return config_map.get(env, DevelopmentConfig)
