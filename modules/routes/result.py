@@ -3,7 +3,7 @@ Result Routes: Exam results and scoring
 Integrated with ScoringEngine
 """
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from ..services import ScoringEngine
 from ..models import ExamResult, Quiz, ExamSession, db
 
@@ -17,12 +17,15 @@ def list_results():
     Returns summary of all exam results including parameters for retake
     """
     try:
-        # Query all exam results with their related quiz and session info
-        results = db.session.query(ExamResult, Quiz, ExamSession).join(
+        quiz_id = request.args.get('quiz_id', type=int)
+        query = db.session.query(ExamResult, Quiz, ExamSession).join(
             Quiz, ExamResult.quiz_id == Quiz.quiz_id
         ).join(
             ExamSession, ExamResult.session_id == ExamSession.session_id
-        ).order_by(ExamResult.submitted_at.desc()).all()
+        )
+        if quiz_id:
+            query = query.filter(ExamResult.quiz_id == quiz_id)
+        results = query.order_by(ExamResult.submitted_at.desc()).all()
         
         exam_list = []
         for exam_result, quiz, session in results:

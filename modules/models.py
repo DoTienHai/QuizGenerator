@@ -30,7 +30,7 @@ class Quiz(db.Model):
         'Question',
         back_populates='quiz',
         cascade='all, delete-orphan',
-        lazy='joined'
+        lazy='select'
     )
     sessions = db.relationship(
         'ExamSession',
@@ -147,14 +147,14 @@ class ExamSession(db.Model):
         'UserAnswer',
         back_populates='session',
         cascade='all, delete-orphan',
-        lazy='joined'
+        lazy='select'
     )
     exam_result = db.relationship(
         'ExamResult',
         back_populates='session',
         uselist=False,
         cascade='all, delete-orphan',
-        lazy='joined'
+        lazy='select'
     )
 
     # Indexes for better query performance

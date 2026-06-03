@@ -155,10 +155,17 @@ class ScoringEngine:
             
             # Get detailed answers
             answers = UserAnswer.query.filter_by(session_id=session_id).all()
-            
+
+            # Load all questions in one query instead of N+1
+            question_ids = [a.question_id for a in answers]
+            questions_map = {
+                q.question_id: q
+                for q in Question.query.filter(Question.question_id.in_(question_ids)).all()
+            }
+
             detailed_answers = []
             for answer in answers:
-                question = Question.query.get(answer.question_id)
+                question = questions_map.get(answer.question_id)
                 if question:
                     detailed_answers.append({
                         'question_id': question.question_id,
@@ -173,7 +180,8 @@ class ScoringEngine:
                         'difficulty': question.difficulty,
                         'answered_at': answer.answered_at.isoformat() if answer.answered_at else None
                     })
-            
+
+            exam_result = ExamResult.query.filter_by(session_id=session_id).first()
             result = {
                 'session_id': session_id,
                 'quiz_id': session.quiz_id,
@@ -184,7 +192,7 @@ class ScoringEngine:
                 'skipped_count': score_info['skipped_count'],
                 'total_questions': score_info['total_questions'],
                 'pass': score_info['pass'],
-                'submitted_at': ExamResult.query.filter_by(session_id=session_id).first().submitted_at.isoformat() if ExamResult.query.filter_by(session_id=session_id).first() else None,
+                'submitted_at': exam_result.submitted_at.isoformat() if exam_result else None,
                 'answers': detailed_answers
             }
             

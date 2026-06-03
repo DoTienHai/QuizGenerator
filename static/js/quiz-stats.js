@@ -22,17 +22,15 @@ async function loadQuizStats() {
         // Update header
         document.getElementById('quizName').textContent = `📚 ${quizName}`;
 
-        // Fetch all results
-        const response = await fetch('/api/results');
+        // Fetch results for this quiz only
+        const response = await fetch(`/api/results?quiz_id=${quizId}`);
         const data = await response.json();
 
         if (!response.ok) {
             throw new Error(data.message || 'Lỗi tải kết quả');
         }
 
-        const allResults = data.data || [];
-        // Filter results for this quiz only
-        const quizResults = allResults.filter(r => r.quiz_id === quizId);
+        const quizResults = data.data || [];
 
         // Calculate statistics from actual results
         let stats = {
