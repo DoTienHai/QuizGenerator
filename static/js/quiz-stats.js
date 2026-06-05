@@ -38,6 +38,9 @@ async function loadPage(quizId, page) {
         }
 
         const { stats, pagination } = data;
+        if (!stats || !pagination) {
+            throw new Error('Cấu trúc response không hợp lệ');
+        }
 
         document.getElementById('totalAttempts').textContent = stats.total_attempts;
         document.getElementById('passCount').textContent = stats.pass_count;
@@ -45,7 +48,7 @@ async function loadPage(quizId, page) {
         document.getElementById('avgScore').textContent = stats.avg_score.toFixed(1) + '%';
 
         renderTable(data.data);
-        renderPagination(quizId, pagination);
+        renderPagination(pagination);
         currentPage = pagination.page;
 
     } catch (error) {
@@ -112,7 +115,7 @@ function renderTable(results) {
 /**
  * Render prev/next pagination controls
  */
-function renderPagination(quizId, pagination) {
+function renderPagination(pagination) {
     const controls = document.getElementById('paginationControls');
 
     if (pagination.total_pages <= 1) {
