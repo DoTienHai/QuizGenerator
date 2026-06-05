@@ -56,6 +56,13 @@
             </div>
         </div>
     </div>
+
+    <!-- Pagination Controls -->
+    <div id="paginationControls" style="display: none; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px;">
+        <button id="btnPrev" class="btn btn-secondary" style="padding: 8px 18px;" onclick="goToPage(currentPage - 1)">← Trang trước</button>
+        <span id="pageInfo" style="color: #667eea; font-weight: bold; font-size: 14px;"></span>
+        <button id="btnNext" class="btn btn-primary" style="padding: 8px 18px;" onclick="goToPage(currentPage + 1)">Trang sau →</button>
+    </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/quiz-stats.js') }}"></script>
