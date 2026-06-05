@@ -38,14 +38,14 @@ def list_results():
     try:
         quiz_id = request.args.get('quiz_id', type=int)
         page = request.args.get('page', type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)
+        per_page = max(1, min(request.args.get('per_page', 10, type=int), 100))
 
         base_query = db.session.query(ExamResult, Quiz, ExamSession).join(
             Quiz, ExamResult.quiz_id == Quiz.quiz_id
         ).join(
             ExamSession, ExamResult.session_id == ExamSession.session_id
         )
-        if quiz_id:
+        if quiz_id is not None:
             base_query = base_query.filter(ExamResult.quiz_id == quiz_id)
         base_query = base_query.order_by(ExamResult.submitted_at.desc())
 
