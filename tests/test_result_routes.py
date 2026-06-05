@@ -10,7 +10,7 @@ from modules.models import db, Quiz, ExamSession, ExamResult
 
 
 def _seed_results(db_instance, quiz_name='Test Quiz', count=15, pass_count=10):
-    """Tạo quiz + N exam results trong DB test."""
+    """Create a quiz with N exam results in the test database."""
     quiz = Quiz(name=quiz_name, total_questions=20)
     db_instance.session.add(quiz)
     db_instance.session.flush()
@@ -30,7 +30,7 @@ def _seed_results(db_instance, quiz_name='Test Quiz', count=15, pass_count=10):
         db_instance.session.flush()
 
         status = 'PASS' if i < pass_count else 'FAIL'
-        score = 80.0 if status == 'PASS' else 40.0
+        score = 80.0 if status == 'PASS' else 40.0  # 16/20=80%, 8/20=40%
         result = ExamResult(
             session_id=session_id,
             quiz_id=quiz.quiz_id,
