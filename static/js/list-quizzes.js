@@ -1,17 +1,17 @@
 /**
- * List Quizzes - Display all available quizzes in table format
+ * List Quizzes - Display all available quizzes in table format with pagination
  */
+
+const PER_PAGE = 10;
+let currentPage = 1;
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadQuizzes();
+    loadQuizzes(currentPage);
 });
 
-/**
- * Load and display all quizzes in table format
- */
-async function loadQuizzes() {
+async function loadQuizzes(page) {
     try {
-        const response = await fetch('/api/quizzes');
+        const response = await fetch(`/api/quizzes?page=${page}&per_page=${PER_PAGE}`);
         const data = await response.json();
 
         if (!data.success) {
@@ -19,14 +19,15 @@ async function loadQuizzes() {
         }
 
         const quizzes = data.data || [];
+        const pagination = data.pagination || {};
         const quizTable = document.getElementById('quizTable');
         const quizTableBody = document.getElementById('quizTableBody');
         const noQuizzesDiv = document.getElementById('noQuizzes');
 
-        if (quizzes.length === 0) {
+        if (quizzes.length === 0 && page === 1) {
             quizTable.style.display = 'none';
             noQuizzesDiv.style.display = 'block';
-            showMessage('Chưa có quiz nào. Hãy tải quiz mới!', 'info');
+            renderPagination(pagination);
             return;
         }
 
@@ -34,11 +35,12 @@ async function loadQuizzes() {
         noQuizzesDiv.style.display = 'none';
         quizTableBody.innerHTML = '';
 
+        const offset = (page - 1) * PER_PAGE;
         quizzes.forEach((quiz, index) => {
             const uploadedDate = new Date(quiz.uploaded_at).toLocaleString('vi-VN') || 'N/A';
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td style="text-align: center; font-weight: bold;">${index + 1}</td>
+                <td style="text-align: center; font-weight: bold;">${offset + index + 1}</td>
                 <td>${quiz.name || `Quiz #${quiz.quiz_id}`}</td>
                 <td style="text-align: center;">
                     <span style="background-color: #e7f3ff; color: #0066cc; padding: 4px 8px; border-radius: 4px;">
@@ -60,17 +62,43 @@ async function loadQuizzes() {
             quizTableBody.appendChild(row);
         });
 
+        renderPagination(pagination);
+
     } catch (error) {
         showMessage(`❌ ${error.message}`, 'error');
     }
 }
 
-/**
- * Start exam with selected quiz
- * @param {number} quizId - Quiz ID
- * @param {string} quizName - Quiz name
- * @param {number} totalQuestions - Total questions in quiz
- */
+function renderPagination(pagination) {
+    const container = document.getElementById('paginationContainer');
+    if (!container) return;
+
+    const { page, total_pages, total } = pagination;
+    if (!total_pages || total_pages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="pagination-info">
+            Trang ${page} / ${total_pages} &nbsp;(${total} quiz)
+        </div>
+        <div class="pagination-controls">
+            <button class="btn btn-secondary" onclick="changePage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>
+                ← Trước
+            </button>
+            <button class="btn btn-secondary" onclick="changePage(${page + 1})" ${page >= total_pages ? 'disabled' : ''}>
+                Tiếp →
+            </button>
+        </div>
+    `;
+}
+
+function changePage(page) {
+    currentPage = page;
+    loadQuizzes(currentPage);
+}
+
 function startExam(quizId, quizName, totalQuestions) {
     sessionStorage.setItem('selectedQuizId', quizId);
     sessionStorage.setItem('selectedQuizName', quizName);
@@ -78,11 +106,6 @@ function startExam(quizId, quizName, totalQuestions) {
     window.location.href = '/exam-do';
 }
 
-/**
- * View quiz statistics and results
- * @param {number} quizId - Quiz ID
- * @param {string} quizName - Quiz name
- */
 function viewQuizStats(quizId, quizName) {
     sessionStorage.setItem('selectedQuizId', quizId);
     sessionStorage.setItem('selectedQuizName', quizName);

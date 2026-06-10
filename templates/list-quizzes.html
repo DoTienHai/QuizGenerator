@@ -20,6 +20,8 @@
 </table>
 </div>
 
+<div id="paginationContainer" style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 8px;"></div>
+
 <div id="noQuizzes" style="text-align: center; padding: 60px 20px;">
     <p style="font-size: 1.2em; color: #999;">📭 Chưa có quiz nào</p>
     <p style="color: #999; margin-bottom: 20px;">Hãy tải quiz mới để bắt đầu!</p>
@@ -52,6 +54,22 @@
     padding: 6px 12px;
     font-size: 0.9em;
     white-space: nowrap;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination-controls .btn[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 </style>
 

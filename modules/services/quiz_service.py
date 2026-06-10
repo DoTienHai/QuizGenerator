@@ -89,7 +89,7 @@ class QuizService:
         }
 
     @staticmethod
-    def list_quizzes(page=1, per_page=20):
+    def list_quizzes(page=1, per_page=10):
         """
         Get paginated list of all quizzes
         Args:
